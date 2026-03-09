@@ -7,3 +7,5 @@ for i in range(strr):
     num = int(num)
     for j in strrr:
         print(j*num, end="")
+    
+    print()
