@@ -34,6 +34,10 @@ def gcd(a, b):
     Returns:
         최대공약수
     """
+    if b == 0:
+        return a
+    return gcd(b, a % b)
+ 
     # TODO: 유클리드 호제법 구현
     # base case: b가 0이면 a 반환
     # recursive를 이용 
@@ -49,11 +53,21 @@ def gcd_iterative(a, b):
     Returns:
         최대공약수
     """
+    
+    for i in range(1000):
+        if b ==0:
+            return a
+        a, b = b, a % b
     # TODO: 반복문으로 구현
     # b가 0이 될 때까지 반복
     pass
 
 def lcm(a, b):
+    
+    if a == 0 or b == 0:
+        return 0
+    return (a * b) // gcd(a, b)
+
     """
     최소공배수 계산
     
@@ -76,13 +90,24 @@ def extended_gcd(a, b):
     
     Returns:
         (gcd, x, y) 튜플
+    
     """
+    
+    if b == 0:
+        return (a, 1, 0)
+    else:
+        g, x1, y1 = extended_gcd(b, a % b)
+        x = y1
+        y = x1 - (a // b) * y1
+        return (g, x, y)
+    
     # TODO: 확장 유클리드 호제법 구현
     # base case: b가 0이면 (a, 1, 0) 반환    
     # recursive case
     # 역추적하며 x, y 계산
     pass
 
+    
 def is_prime(n):
     """
     소수 판별
@@ -93,6 +118,15 @@ def is_prime(n):
     Returns:
         소수이면 True, 아니면 False
     """
+    if n < 2:
+        return False
+    
+    
+    for i in range(2,n):
+        if n % i == 0:
+            return False
+    return True
+
     # TODO: 소수 판별 구현
     # n이 2보다 작으면 False
     # 2부터 sqrt(n)까지 나누어 떨어지는지 확인    
