@@ -33,6 +33,11 @@ def bubble_sort(arr):
         정렬된 배열
     """
     n = len(arr)
+
+    for i in range(n - 1):
+        for j in range(n - 1 - i):
+            if arr[j] > arr[j + 1]:
+                arr[j], arr[j + 1] = arr[j + 1], arr[j]
     
     # TODO: 외부 반복문 - n-1번 반복
     # 각 패스마다 가장 큰 원소가 끝으로 이동
@@ -45,6 +50,10 @@ def bubble_sort(arr):
         
     return arr
 
+
+
+
+
 def bubble_sort_optimized(arr):
     """
     최적화된 버블 정렬 (조기 종료 포함)
@@ -56,9 +65,19 @@ def bubble_sort_optimized(arr):
         정렬된 배열
     """
     n = len(arr)
+
+    for i in range(n - 1):
+        swapped = False  # 교환 여부를 추적하는 변수
+        for j in range(n - 1 - i):
+            if arr[j] > arr[j + 1]:
+                arr[j], arr[j + 1] = arr[j + 1], arr[j]
+                swapped = True  # 교환이 발생했으므로 True로 설정
+        if not swapped:
+            break  # 교환이 없으면 이미 정렬된 것이므로 종료
+        
     
-    for i in range(n):
-        swapped = False  # 교환 발생 여부
+        
+        
         
         # TODO: 내부 반복문과 교환 로직 구현
         # 교환이 발생하면 swapped = True 설정        
