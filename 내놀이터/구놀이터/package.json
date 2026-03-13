@@ -1,11 +1,10 @@
 {
-  "name": "always-on-story-monitor",
+  "name": "git",
   "version": "1.0.0",
-  "description": "Always-on story monitor with Slack alerts",
-  "main": "server.mjs",
+  "description": "선호의 연습장입니다",
+  "main": "index.js",
   "scripts": {
-    "start": "node server.mjs",
-    "dev": "node --watch server.mjs"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
@@ -20,7 +19,6 @@
   },
   "homepage": "https://github.com/seonho12-54/jungle#readme",
   "dependencies": {
-    "express": "^5.2.1",
-    "playwright": "^1.58.2"
+    "express": "^5.2.1"
   }
 }
