@@ -24,9 +24,16 @@
 - pop(0): 앞에서 제거 (dequeue)
 """
 
+
+
+
+
+
+
 from collections import deque
 
 def process_print_queue(jobs):
+    
     """
     프린터 작업을 순서대로 처리
     
@@ -36,6 +43,7 @@ def process_print_queue(jobs):
     Returns:
         처리된 작업 리스트
     """
+    
     # TODO: deque로 큐 생성
     queue = deque(jobs)
     
@@ -43,10 +51,35 @@ def process_print_queue(jobs):
     
     # TODO: 큐가 비어있지 않은 동안 반복
     ## 큐에서 작업 꺼내기
+    
+    while queue:
+        processed.append(queue.popleft())
     ## 작업 처리 (출력 및 리스트에 추가)
+    for job in processed:
+        print(f"처리: {job}")
+    
+    
+    ## 작업 처리 (출력 및 리스트에 추가)
+    
+    
+    
     pass
     
+    
+    
+    
+    
+    
     return processed
+
+
+
+
+
+
+
+
+
 
 # 테스트 케이스
 if __name__ == "__main__":
