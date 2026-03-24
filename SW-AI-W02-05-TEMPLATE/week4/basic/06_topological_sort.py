@@ -41,21 +41,58 @@ def topological_sort(vertices, edges):
     """
     # TODO: 그래프와 진입 차수 초기화
     pass
+    queue = deque()
+    result = []
+    graph =[[] for _ in range(vertices)]
     
-    # TODO: 그래프 구성 및 진입 차수 계산
+    
+    
+    
+    
+    # TODO: 그래프 구성 및 진입 차수 계산 어떻게??
     pass
+
+    indegree = [0]*vertices
     
+    for a, b in  edges:
+        graph[a].append(b)
+        indegree[b] += 1
+    
+    
+    #노드만들기
+    for i in range(vertices):
+        if indegree[i] == 0:
+            queue.append(i)
+    
+    
+            
     # TODO: 진입 차수가 0인 정점들을 큐에 추가
     pass
     
-    result = []
-    
+    while queue:
+        current = queue.popleft()
+        result.append(current)
+        
+        for i in graph[current]:
+            indegree[i]-=1
+            if indegree[i] ==0:
+                queue.append(i)
+
+        
     # TODO: 큐가 빌 때까지 반복
+
     ## 큐에서 정점 꺼내기
     ## 인접한 정점들의 진입 차수 감소
     pass
     
     return result
+
+
+
+
+
+
+
 
 # 테스트 케이스
 if __name__ == "__main__":
