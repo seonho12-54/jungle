@@ -1,0 +1,1721 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>백준 9084 동전 DP 시각화</title>
+  <style>
+    :root {
+      --bg: #f4f7f8;
+      --bg-strong: #e8f2f1;
+      --surface: rgba(255, 255, 255, 0.9);
+      --surface-strong: #ffffff;
+      --line: #d9e3e6;
+      --line-strong: #bfd1d7;
+      --text: #18303b;
+      --muted: #5e7480;
+      --primary: #0f766e;
+      --primary-soft: #d8f4ef;
+      --source: #2563eb;
+      --source-soft: #dbeafe;
+      --target: #f59e0b;
+      --target-soft: #fef3c7;
+      --answer: #0891b2;
+      --answer-soft: #cffafe;
+      --success: #15803d;
+      --success-soft: #dcfce7;
+      --danger: #b91c1c;
+      --danger-soft: #fee2e2;
+      --shadow: 0 18px 40px rgba(21, 49, 64, 0.08);
+      --radius: 24px;
+      --radius-small: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top right, rgba(15, 118, 110, 0.08), transparent 26%),
+        radial-gradient(circle at bottom left, rgba(245, 158, 11, 0.08), transparent 28%),
+        linear-gradient(180deg, #f7fbfb 0%, #eef5f5 48%, #f8fafc 100%);
+      font-family: "Pretendard Variable", "SUIT Variable", "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      line-height: 1.55;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .page {
+      width: min(1240px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 48px;
+    }
+
+    .hero {
+      padding: 28px;
+      border-radius: 30px;
+      background:
+        linear-gradient(135deg, rgba(15, 118, 110, 0.96), rgba(20, 83, 45, 0.88)),
+        linear-gradient(135deg, #0f766e, #14532d);
+      color: #f5fffd;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -80px -90px auto;
+      width: 220px;
+      height: 220px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .hero h1 {
+      margin: 0 0 10px;
+      font-size: clamp(2rem, 4vw, 3.3rem);
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 820px;
+      color: rgba(245, 255, 253, 0.9);
+      font-size: clamp(1rem, 2vw, 1.12rem);
+    }
+
+    .section-grid {
+      display: grid;
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .section-grid.top {
+      grid-template-columns: minmax(320px, 0.95fr) minmax(360px, 1.05fr);
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid rgba(191, 209, 215, 0.78);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px;
+      backdrop-filter: blur(12px);
+    }
+
+    .card h2,
+    .card h3 {
+      margin: 0 0 14px;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .input-grid {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: 1fr 180px;
+      margin-bottom: 14px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .field label {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .field input {
+      height: 50px;
+      border-radius: 14px;
+      border: 1px solid var(--line-strong);
+      background: var(--surface-strong);
+      padding: 0 14px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .field input:focus {
+      border-color: rgba(15, 118, 110, 0.65);
+      box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
+    }
+
+    .field small {
+      color: var(--muted);
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .button-row + .button-row {
+      margin-top: 10px;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 11px 16px;
+      cursor: pointer;
+      transition: transform 0.16s ease, opacity 0.16s ease, background-color 0.16s ease;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: #ffffff;
+      background: var(--primary);
+    }
+
+    .btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+    }
+
+    .btn:disabled {
+      opacity: 0.46;
+      cursor: not-allowed;
+    }
+
+    .btn.secondary {
+      background: #34515d;
+    }
+
+    .btn.soft {
+      background: #e8f2f1;
+      color: var(--primary);
+    }
+
+    .btn.warning {
+      background: #b45309;
+    }
+
+    .message-box {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      font-size: 0.95rem;
+    }
+
+    .message-box.info {
+      color: #124b46;
+      background: #e5f4f1;
+      border-color: rgba(15, 118, 110, 0.18);
+    }
+
+    .message-box.success {
+      color: #14532d;
+      background: var(--success-soft);
+      border-color: rgba(21, 128, 61, 0.18);
+    }
+
+    .message-box.warning {
+      color: #9a3412;
+      background: #ffedd5;
+      border-color: rgba(234, 88, 12, 0.18);
+    }
+
+    .message-box.error {
+      color: var(--danger);
+      background: var(--danger-soft);
+      border-color: rgba(185, 28, 28, 0.18);
+    }
+
+    .concept-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .concept-item {
+      padding: 14px 15px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.72);
+    }
+
+    .concept-item strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.98rem;
+      color: var(--text);
+    }
+
+    .concept-item span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .status-grid {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(4, minmax(140px, 1fr));
+      margin-bottom: 14px;
+    }
+
+    .status-box {
+      position: relative;
+      overflow: hidden;
+      padding: 18px;
+      border-radius: 20px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+    }
+
+    .status-box::after {
+      content: "";
+      position: absolute;
+      inset: auto -30px -40px auto;
+      width: 110px;
+      height: 110px;
+      border-radius: 999px;
+      opacity: 0.12;
+      background: currentColor;
+    }
+
+    .status-box.primary {
+      color: var(--primary);
+      background: var(--primary-soft);
+      border-color: rgba(15, 118, 110, 0.18);
+    }
+
+    .status-box.target {
+      color: #b45309;
+      background: var(--target-soft);
+      border-color: rgba(245, 158, 11, 0.22);
+    }
+
+    .status-box.source {
+      color: var(--source);
+      background: var(--source-soft);
+      border-color: rgba(37, 99, 235, 0.18);
+    }
+
+    .status-box.dark {
+      color: #1f2937;
+      background: #eef2f7;
+      border-color: rgba(71, 85, 105, 0.18);
+    }
+
+    .status-label {
+      display: block;
+      position: relative;
+      z-index: 1;
+      font-size: 0.85rem;
+      font-weight: 700;
+      opacity: 0.9;
+      margin-bottom: 10px;
+    }
+
+    .status-value {
+      position: relative;
+      z-index: 1;
+      display: block;
+      font-size: clamp(1.35rem, 3vw, 2.1rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1.1;
+    }
+
+    .status-help {
+      position: relative;
+      z-index: 1;
+      display: block;
+      margin-top: 8px;
+      font-size: 0.88rem;
+      color: rgba(24, 48, 59, 0.7);
+    }
+
+    .formula-box {
+      display: grid;
+      gap: 8px;
+      padding: 16px 18px;
+      border-radius: 20px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      margin-bottom: 16px;
+    }
+
+    .formula-box strong {
+      font-size: 0.95rem;
+    }
+
+    .formula-text {
+      font-size: clamp(1rem, 2.3vw, 1.2rem);
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.02em;
+      word-break: break-word;
+    }
+
+    .progress-row {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+    }
+
+    .progress-row span {
+      font-size: 0.94rem;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 10px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #e7eef1;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #0f766e, #22c55e);
+      transition: width 0.24s ease;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: #f6fafb;
+      border: 1px solid var(--line);
+    }
+
+    .legend-swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      display: inline-block;
+      border: 1px solid transparent;
+    }
+
+    .legend-swatch.base {
+      background: #edf7ef;
+      border-color: rgba(21, 128, 61, 0.16);
+    }
+
+    .legend-swatch.source {
+      background: var(--source-soft);
+      border-color: rgba(37, 99, 235, 0.22);
+    }
+
+    .legend-swatch.target {
+      background: var(--target-soft);
+      border-color: rgba(245, 158, 11, 0.22);
+    }
+
+    .legend-swatch.answer {
+      background: var(--answer-soft);
+      border-color: rgba(8, 145, 178, 0.22);
+    }
+
+    .legend-swatch.goal {
+      background: transparent;
+      border-style: dashed;
+      border-color: rgba(15, 118, 110, 0.46);
+    }
+
+    .dp-grid {
+      display: grid;
+      gap: 12px;
+      margin-top: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+    }
+
+    .dp-cell {
+      min-height: 112px;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      background: #ffffff;
+      padding: 12px 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: flex-start;
+      justify-content: space-between;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .dp-cell:hover {
+      transform: translateY(-2px);
+    }
+
+    .dp-cell.goal {
+      border-style: dashed;
+      border-color: rgba(15, 118, 110, 0.55);
+    }
+
+    .dp-cell.base {
+      background: #edf7ef;
+      border-color: rgba(21, 128, 61, 0.18);
+    }
+
+    .dp-cell.source {
+      background: var(--source-soft);
+      border-color: rgba(37, 99, 235, 0.3);
+      box-shadow: 0 12px 28px rgba(37, 99, 235, 0.12);
+    }
+
+    .dp-cell.target {
+      background: var(--target-soft);
+      border-color: rgba(245, 158, 11, 0.34);
+      box-shadow: 0 12px 28px rgba(245, 158, 11, 0.14);
+    }
+
+    .dp-cell.answer {
+      background: var(--answer-soft);
+      border-color: rgba(8, 145, 178, 0.34);
+      box-shadow: 0 12px 28px rgba(8, 145, 178, 0.12);
+    }
+
+    .dp-index {
+      font-size: 0.86rem;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .dp-value {
+      font-size: clamp(1.45rem, 2.8vw, 1.8rem);
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.03em;
+      color: var(--text);
+    }
+
+    .dp-tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: rgba(24, 48, 59, 0.78);
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(191, 209, 215, 0.78);
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .controls .btn {
+      min-width: 92px;
+    }
+
+    .speed-box {
+      margin-left: auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 16px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .speed-box input[type="range"] {
+      width: min(240px, 52vw);
+      accent-color: var(--primary);
+    }
+
+    .explain-panel {
+      display: grid;
+      gap: 10px;
+    }
+
+    .explain-panel p {
+      margin: 0;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: #fbfdfd;
+      border: 1px solid var(--line);
+      color: var(--text);
+    }
+
+    .table-note {
+      margin-bottom: 14px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: #ffffff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 720px;
+    }
+
+    th,
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #edf2f4;
+      text-align: left;
+      font-size: 0.94rem;
+      white-space: nowrap;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: #f9fbfc;
+      color: var(--muted);
+      font-size: 0.88rem;
+      letter-spacing: -0.01em;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: 0;
+    }
+
+    tbody tr.is-current {
+      background: #fff7e6;
+    }
+
+    .empty-row td {
+      color: var(--muted);
+      text-align: center;
+      padding: 24px 14px;
+    }
+
+    .code-meta {
+      margin-bottom: 12px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .code-box {
+      overflow: auto;
+      border-radius: 18px;
+      border: 1px solid #102734;
+      background: #0f172a;
+      color: #dbe7ff;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    }
+
+    .code-line {
+      display: grid;
+      grid-template-columns: 56px 1fr;
+      gap: 14px;
+      padding: 8px 16px;
+      min-height: 38px;
+      align-items: center;
+      font-family: "Consolas", "Courier New", monospace;
+      font-size: 0.95rem;
+      white-space: pre;
+      transition: background-color 0.18s ease;
+    }
+
+    .code-line.context {
+      background: rgba(37, 99, 235, 0.12);
+    }
+
+    .code-line.active {
+      background: rgba(245, 158, 11, 0.18);
+      box-shadow: inset 4px 0 0 #f59e0b;
+    }
+
+    .code-line.blank .code-text::before {
+      content: " ";
+    }
+
+    .code-no {
+      color: #7c90b8;
+      text-align: right;
+      user-select: none;
+    }
+
+    .code-text {
+      color: inherit;
+    }
+
+    .result-box {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: minmax(220px, 280px) 1fr;
+      align-items: stretch;
+    }
+
+    .answer-box {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 22px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, rgba(8, 145, 178, 0.95), rgba(14, 116, 144, 0.88));
+      color: #ecfeff;
+    }
+
+    .answer-box span {
+      font-size: 0.92rem;
+      font-weight: 700;
+      opacity: 0.92;
+    }
+
+    .answer-box strong {
+      margin-top: 10px;
+      font-size: clamp(2.4rem, 6vw, 3.7rem);
+      line-height: 1;
+      letter-spacing: -0.05em;
+    }
+
+    .result-details {
+      display: grid;
+      gap: 12px;
+    }
+
+    .result-line {
+      padding: 16px 18px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: #ffffff;
+    }
+
+    .result-line strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.96rem;
+    }
+
+    .result-line span {
+      color: var(--muted);
+    }
+
+    .tiny {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    @media (max-width: 980px) {
+      .section-grid.top {
+        grid-template-columns: 1fr;
+      }
+
+      .status-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .result-box {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .page {
+        width: min(100% - 20px, 1240px);
+        padding-top: 20px;
+      }
+
+      .card,
+      .hero {
+        padding: 18px;
+        border-radius: 22px;
+      }
+
+      .input-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .status-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .progress-row {
+        grid-template-columns: 1fr;
+      }
+
+      .speed-box {
+        width: 100%;
+        margin-left: 0;
+        justify-content: space-between;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .status-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .controls .btn {
+        flex: 1 1 calc(50% - 10px);
+      }
+
+      .speed-box {
+        justify-content: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <h1>백준 9084 동전 DP 시각화</h1>
+      <p>
+        dp 배열이 어떻게 바뀌는지, 왜 <code>dp[i] += dp[i - coin]</code>인지, 그리고 왜 순서를 바꾼 같은 조합을 한 번만 세는지까지
+        한 단계씩 눈으로 이해할 수 있게 만든 교육용 페이지입니다.
+      </p>
+    </header>
+
+    <section class="section-grid top">
+      <article class="card">
+        <h2>입력 영역</h2>
+        <div class="input-grid">
+          <div class="field">
+            <label for="coinsInput">동전 목록</label>
+            <input id="coinsInput" type="text" inputmode="numeric" placeholder="예: 1 2 5">
+            <small>공백이나 쉼표로 구분하세요. 0 이하나 중복 동전은 허용하지 않습니다.</small>
+          </div>
+          <div class="field">
+            <label for="targetInput">목표 금액 M</label>
+            <input id="targetInput" type="number" min="1" step="1" placeholder="예: 10">
+            <small>0보다 큰 정수만 입력할 수 있습니다.</small>
+          </div>
+        </div>
+
+        <div class="button-row">
+          <button class="btn soft" id="example1Button" type="button">예제 1: [1,2], M=4</button>
+          <button class="btn soft" id="example2Button" type="button">예제 2: [1,5,10], M=10</button>
+        </div>
+
+        <div class="button-row">
+          <button class="btn" id="startButton" type="button">시각화 시작</button>
+          <button class="btn secondary" id="resetButton" type="button">초기화</button>
+        </div>
+
+        <div id="messageBox" class="message-box info" aria-live="polite"></div>
+      </article>
+
+      <article class="card">
+        <h2>핵심 개념 요약</h2>
+        <div class="concept-list">
+          <div class="concept-item">
+            <strong>dp[x] = x원을 만드는 방법의 수</strong>
+            <span>배열의 각 칸은 “그 금액을 만들 수 있는 경우가 몇 개냐”를 저장합니다.</span>
+          </div>
+          <div class="concept-item">
+            <strong>dp[0] = 1 인 이유</strong>
+            <span>아무 동전도 쓰지 않고 0원을 만드는 방법이 정확히 1개 있기 때문입니다. 이 1이 출발점이 됩니다.</span>
+          </div>
+          <div class="concept-item">
+            <strong>dp[i] += dp[i-coin] 의 의미</strong>
+            <span>마지막에 <code>coin</code>을 하나 붙인다고 생각하면, 앞에는 <code>i-coin</code>원을 만드는 방법이 와야 합니다.</span>
+          </div>
+          <div class="concept-item">
+            <strong>왜 바깥 루프가 coin 인가</strong>
+            <span>동전을 종류별로 차례대로 처리해야 조합만 세고, 같은 금액을 순서만 바꿔 여러 번 세지 않게 됩니다.</span>
+          </div>
+          <div class="concept-item">
+            <strong>왜 1+2 와 2+1을 따로 세지 않나</strong>
+            <span>이미 처리한 동전만 사용해 dp를 쌓아 가기 때문에, 같은 조합은 한 번만 만들어지고 순서 정보는 끼어들지 않습니다.</span>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="card section-grid">
+      <div>
+        <h2>현재 상태 패널</h2>
+        <p>현재 보고 있는 snapshot의 위치와 의미를 한 번에 보여줍니다.</p>
+      </div>
+
+      <div class="status-grid">
+        <div class="status-box primary">
+          <span class="status-label">현재 coin</span>
+          <strong class="status-value" id="currentCoinValue">-</strong>
+          <span class="status-help" id="currentPhaseText">준비 단계</span>
+        </div>
+        <div class="status-box target">
+          <span class="status-label">현재 i</span>
+          <strong class="status-value" id="currentIValue">-</strong>
+          <span class="status-help" id="currentTargetText">갱신 대상 칸</span>
+        </div>
+        <div class="status-box source">
+          <span class="status-label">참조 칸</span>
+          <strong class="status-value" id="currentSourceValue">-</strong>
+          <span class="status-help" id="currentSourceHelp">dp[i-coin]</span>
+        </div>
+        <div class="status-box dark">
+          <span class="status-label">진행도</span>
+          <strong class="status-value" id="progressValue">1 / 1</strong>
+          <span class="status-help" id="operationProgressText">실제 연산 0 / 0</span>
+        </div>
+      </div>
+
+      <div class="formula-box">
+        <strong>이번 단계 한 줄 설명</strong>
+        <div class="formula-text" id="formulaText">dp[0] = 1</div>
+      </div>
+
+      <div class="progress-row">
+        <span>전체 단계</span>
+        <div class="progress-track" aria-hidden="true">
+          <div id="progressFill" class="progress-fill"></div>
+        </div>
+        <span id="progressRatioText">1 / 1</span>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>dp 배열 시각화</h2>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-swatch base"></span> 시작값 dp[0]</span>
+        <span class="legend-item"><span class="legend-swatch source"></span> 참조하는 칸 dp[i-coin]</span>
+        <span class="legend-item"><span class="legend-swatch target"></span> 갱신되는 칸 dp[i]</span>
+        <span class="legend-item"><span class="legend-swatch answer"></span> 최종 정답 칸</span>
+        <span class="legend-item"><span class="legend-swatch goal"></span> 목표 금액 M 위치</span>
+      </div>
+      <div id="dpGrid" class="dp-grid"></div>
+    </section>
+
+    <section class="card">
+      <h2>실행 컨트롤</h2>
+      <div class="controls">
+        <button class="btn soft" id="firstButton" type="button">맨 처음으로</button>
+        <button class="btn secondary" id="prevButton" type="button">이전 단계</button>
+        <button class="btn" id="nextButton" type="button">다음 단계</button>
+        <button class="btn" id="playButton" type="button">자동 재생</button>
+        <button class="btn warning" id="pauseButton" type="button">일시정지</button>
+        <button class="btn soft" id="lastButton" type="button">맨 끝으로</button>
+
+        <div class="speed-box">
+          <label for="speedInput">재생 속도</label>
+          <input id="speedInput" type="range" min="300" max="1800" step="100" value="1000">
+          <span id="speedLabel">1000ms/단계</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>설명 패널</h2>
+      <div id="explainPanel" class="explain-panel"></div>
+    </section>
+
+    <section class="card">
+      <h2>단계 로그 테이블</h2>
+      <p class="table-note">실제 연산 단계만 누적 기록합니다. coin 시작 단계나 마지막 출력 단계는 표에 넣지 않습니다.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>단계</th>
+              <th>coin</th>
+              <th>i</th>
+              <th>이전 dp[i]</th>
+              <th>참조 dp[i-coin]</th>
+              <th>결과 dp[i]</th>
+            </tr>
+          </thead>
+          <tbody id="logBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>코드 하이라이트 패널</h2>
+      <p class="code-meta">아래 코드는 문제 풀이용 정답 코드입니다. 현재 snapshot과 연결된 줄을 함께 강조합니다.</p>
+      <div id="codeBox" class="code-box"></div>
+    </section>
+
+    <section class="card">
+      <h2>최종 결과</h2>
+      <div class="result-box">
+        <div class="answer-box">
+          <span>최종 dp[M]</span>
+          <strong id="finalAnswerValue">0</strong>
+        </div>
+        <div class="result-details">
+          <div class="result-line">
+            <strong id="finalAnswerText">목표 금액 M을 만드는 방법 수 = 0</strong>
+            <span id="currentTargetState">현재 보고 있는 단계의 dp[M] = 0</span>
+          </div>
+          <div class="result-line">
+            <strong>해석</strong>
+            <span id="resultInterpretation">모든 동전 처리가 끝나면 이 값이 정답으로 출력됩니다.</span>
+          </div>
+          <div class="tiny">이 영역은 최종 정답과 현재 snapshot 기준 값을 함께 보여줘서, 계산이 어디까지 왔는지 비교하기 쉽게 만들어 두었습니다.</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // 고정된 예제 코드입니다. 라인 번호까지 유지해서 현재 실행 위치를 시각적으로 보여줍니다.
+    const CODE_LINES = [
+      "T = int(input())",
+      "",
+      "for _ in range(T):",
+      "    N = int(input())",
+      "    coins = list(map(int, input().split()))",
+      "    M = int(input())",
+      "",
+      "    dp = [0] * (M + 1)",
+      "    dp[0] = 1",
+      "",
+      "    for coin in coins:",
+      "        for i in range(coin, M + 1):",
+      "            dp[i] += dp[i - coin]",
+      "",
+      "    print(dp[M])"
+    ];
+
+    const DEFAULT_EXAMPLE = {
+      coinsText: "1 2",
+      targetText: "4"
+    };
+
+    // 필요한 상태는 한 객체 안에서 관리해 전역 변수를 최소화합니다.
+    const appState = {
+      coins: [],
+      target: 0,
+      snapshots: [],
+      totalOperations: 0,
+      currentIndex: 0,
+      speedMs: 1000,
+      autoplayTimer: null
+    };
+
+    const dom = {};
+
+    document.addEventListener("DOMContentLoaded", initializeApp);
+
+    function initializeApp() {
+      cacheDom();
+      attachEvents();
+
+      dom.coinsInput.value = DEFAULT_EXAMPLE.coinsText;
+      dom.targetInput.value = DEFAULT_EXAMPLE.targetText;
+      dom.speedInput.value = String(appState.speedMs);
+
+      updateSpeedLabel();
+      runVisualization({ notice: "기본 예제를 불러왔습니다." });
+    }
+
+    function cacheDom() {
+      dom.coinsInput = document.getElementById("coinsInput");
+      dom.targetInput = document.getElementById("targetInput");
+      dom.messageBox = document.getElementById("messageBox");
+      dom.dpGrid = document.getElementById("dpGrid");
+      dom.explainPanel = document.getElementById("explainPanel");
+      dom.logBody = document.getElementById("logBody");
+      dom.codeBox = document.getElementById("codeBox");
+
+      dom.currentCoinValue = document.getElementById("currentCoinValue");
+      dom.currentIValue = document.getElementById("currentIValue");
+      dom.currentSourceValue = document.getElementById("currentSourceValue");
+      dom.currentPhaseText = document.getElementById("currentPhaseText");
+      dom.currentTargetText = document.getElementById("currentTargetText");
+      dom.currentSourceHelp = document.getElementById("currentSourceHelp");
+      dom.progressValue = document.getElementById("progressValue");
+      dom.operationProgressText = document.getElementById("operationProgressText");
+      dom.formulaText = document.getElementById("formulaText");
+      dom.progressFill = document.getElementById("progressFill");
+      dom.progressRatioText = document.getElementById("progressRatioText");
+
+      dom.finalAnswerValue = document.getElementById("finalAnswerValue");
+      dom.finalAnswerText = document.getElementById("finalAnswerText");
+      dom.currentTargetState = document.getElementById("currentTargetState");
+      dom.resultInterpretation = document.getElementById("resultInterpretation");
+
+      dom.example1Button = document.getElementById("example1Button");
+      dom.example2Button = document.getElementById("example2Button");
+      dom.startButton = document.getElementById("startButton");
+      dom.resetButton = document.getElementById("resetButton");
+
+      dom.firstButton = document.getElementById("firstButton");
+      dom.prevButton = document.getElementById("prevButton");
+      dom.nextButton = document.getElementById("nextButton");
+      dom.playButton = document.getElementById("playButton");
+      dom.pauseButton = document.getElementById("pauseButton");
+      dom.lastButton = document.getElementById("lastButton");
+      dom.speedInput = document.getElementById("speedInput");
+      dom.speedLabel = document.getElementById("speedLabel");
+    }
+
+    function attachEvents() {
+      dom.startButton.addEventListener("click", function () {
+        runVisualization({ notice: "입력값으로 시각화를 다시 계산했습니다." });
+      });
+
+      dom.resetButton.addEventListener("click", function () {
+        pauseAutoplay();
+        dom.coinsInput.value = DEFAULT_EXAMPLE.coinsText;
+        dom.targetInput.value = DEFAULT_EXAMPLE.targetText;
+        runVisualization({ notice: "기본값으로 초기화했습니다." });
+      });
+
+      dom.example1Button.addEventListener("click", function () {
+        applyExample("1 2", "4", "예제 1을 불러와 즉시 다시 계산했습니다.");
+      });
+
+      dom.example2Button.addEventListener("click", function () {
+        applyExample("1 5 10", "10", "예제 2를 불러와 즉시 다시 계산했습니다.");
+      });
+
+      dom.firstButton.addEventListener("click", function () {
+        pauseAutoplay();
+        goToStep(0);
+      });
+
+      dom.prevButton.addEventListener("click", function () {
+        pauseAutoplay();
+        goToStep(appState.currentIndex - 1);
+      });
+
+      dom.nextButton.addEventListener("click", function () {
+        pauseAutoplay();
+        goToStep(appState.currentIndex + 1);
+      });
+
+      dom.lastButton.addEventListener("click", function () {
+        pauseAutoplay();
+        goToStep(appState.snapshots.length - 1);
+      });
+
+      dom.playButton.addEventListener("click", startAutoplay);
+      dom.pauseButton.addEventListener("click", pauseAutoplay);
+
+      dom.speedInput.addEventListener("input", function () {
+        appState.speedMs = Number(dom.speedInput.value);
+        updateSpeedLabel();
+
+        // 자동 재생 중이라면 새 속도로 다시 시작해 즉시 반영합니다.
+        if (appState.autoplayTimer) {
+          startAutoplay();
+        }
+      });
+    }
+
+    function applyExample(coinsText, targetText, notice) {
+      pauseAutoplay();
+      dom.coinsInput.value = coinsText;
+      dom.targetInput.value = targetText;
+      runVisualization({ notice: notice });
+    }
+
+    // 사용자가 입력한 값을 안전하게 정리하고, 잘못된 입력은 이유와 함께 막습니다.
+    function parseInput() {
+      const coinsText = dom.coinsInput.value.trim();
+      const targetText = dom.targetInput.value.trim();
+
+      if (!coinsText) {
+        return {
+          ok: false,
+          message: "동전 목록이 비어 있습니다. 예: 1 2 5 형태로 입력해 주세요."
+        };
+      }
+
+      const tokens = coinsText.split(/[\s,]+/).filter(Boolean);
+      const coins = [];
+      const duplicates = [];
+      const seen = new Set();
+
+      for (const token of tokens) {
+        if (!/^[+-]?\d+$/.test(token)) {
+          return {
+            ok: false,
+            message: "동전 목록에는 숫자만 넣을 수 있습니다. 공백이나 쉼표로 구분해 주세요."
+          };
+        }
+
+        const value = Number(token);
+
+        if (!Number.isInteger(value) || value <= 0) {
+          return {
+            ok: false,
+            message: "동전 값은 0보다 큰 정수만 허용됩니다."
+          };
+        }
+
+        if (seen.has(value)) {
+          duplicates.push(value);
+          continue;
+        }
+
+        seen.add(value);
+        coins.push(value);
+      }
+
+      if (!coins.length) {
+        return {
+          ok: false,
+          message: "사용할 수 있는 동전이 없습니다. 0보다 큰 정수를 하나 이상 입력해 주세요."
+        };
+      }
+
+      if (!targetText) {
+        return {
+          ok: false,
+          message: "목표 금액 M이 비어 있습니다."
+        };
+      }
+
+      if (!/^[+-]?\d+$/.test(targetText)) {
+        return {
+          ok: false,
+          message: "목표 금액 M은 정수만 입력할 수 있습니다."
+        };
+      }
+
+      const target = Number(targetText);
+
+      if (!Number.isInteger(target) || target <= 0) {
+        return {
+          ok: false,
+          message: "목표 금액 M은 0보다 큰 정수여야 합니다."
+        };
+      }
+
+      const notes = [];
+
+      if (duplicates.length) {
+        const uniqueDuplicates = [...new Set(duplicates)];
+        notes.push("중복 동전 " + uniqueDuplicates.join(", ") + "원은 자동으로 한 번만 반영했습니다.");
+      }
+
+      return {
+        ok: true,
+        coins: coins,
+        target: target,
+        notes: notes
+      };
+    }
+
+    function runVisualization(options) {
+      const parsed = parseInput();
+
+      if (!parsed.ok) {
+        setMessage(parsed.message, "error");
+        return;
+      }
+
+      pauseAutoplay();
+
+      appState.coins = parsed.coins;
+      appState.target = parsed.target;
+      appState.snapshots = buildSnapshots(parsed.coins, parsed.target);
+      appState.totalOperations = appState.snapshots.filter(function (snapshot) {
+        return snapshot.phase === "operation";
+      }).length;
+      appState.currentIndex = 0;
+
+      const baseNotice = options && options.notice ? options.notice : "시각화를 다시 계산했습니다.";
+      const detailNotice = " 표시 단계 " + appState.snapshots.length + "개, 실제 연산 " + appState.totalOperations + "개입니다.";
+      const extraNotes = parsed.notes.length ? " " + parsed.notes.join(" ") : "";
+      const tone = parsed.notes.length ? "warning" : "success";
+
+      setMessage(baseNotice + detailNotice + extraNotes, tone);
+      renderAll();
+    }
+
+    // 모든 단계는 미리 계산해서 snapshots 배열에 넣습니다.
+    // 그래야 이전/다음 탐색이 정확하고, 자동 재생도 흔들리지 않습니다.
+    function buildSnapshots(coins, target) {
+      const dp = Array(target + 1).fill(0);
+      const snapshots = [];
+      let operationCounter = 0;
+
+      dp[0] = 1;
+
+      pushSnapshot({
+        phase: "init",
+        coin: null,
+        i: null,
+        dp: dp.slice(),
+        beforeValue: null,
+        addValue: null,
+        afterValue: null,
+        targetIndex: 0,
+        sourceIndex: null,
+        completedOperations: operationCounter,
+        description: [
+          "초기 상태입니다.",
+          "dp[0] = 1 은 아무 동전도 쓰지 않고 0원을 만드는 방법이 1개라는 뜻입니다.",
+          "이 1이 있어야 이후 금액들이 차례대로 만들어질 수 있습니다."
+        ].join("\n"),
+        formula: "dp[0] = 1",
+        primaryLine: 9,
+        relatedLines: [8]
+      });
+
+      for (const coin of coins) {
+        pushSnapshot({
+          phase: "coin-start",
+          coin: coin,
+          i: null,
+          dp: dp.slice(),
+          beforeValue: null,
+          addValue: null,
+          afterValue: null,
+          targetIndex: null,
+          sourceIndex: null,
+          completedOperations: operationCounter,
+          description: buildCoinStartDescription(coin, target),
+          formula: coin <= target
+            ? coin + "원 동전을 기준으로 i를 " + coin + "부터 " + target + "까지 움직입니다."
+            : coin + "원 동전은 목표 금액보다 커서 이번에는 갱신 없이 넘어갑니다.",
+          primaryLine: 11,
+          relatedLines: [12]
+        });
+
+        for (let i = coin; i <= target; i += 1) {
+          const beforeValue = dp[i];
+          const addValue = dp[i - coin];
+          const afterValue = beforeValue + addValue;
+
+          dp[i] = afterValue;
+          operationCounter += 1;
+
+          pushSnapshot({
+            phase: "operation",
+            operationStep: operationCounter,
+            coin: coin,
+            i: i,
+            dp: dp.slice(),
+            beforeValue: beforeValue,
+            addValue: addValue,
+            afterValue: afterValue,
+            targetIndex: i,
+            sourceIndex: i - coin,
+            completedOperations: operationCounter,
+            description: buildOperationDescription(coin, i, beforeValue, addValue, afterValue),
+            formula: "dp[" + i + "] = dp[" + i + "] + dp[" + (i - coin) + "] = " + beforeValue + " + " + addValue + " = " + afterValue,
+            primaryLine: 13,
+            relatedLines: [11, 12]
+          });
+        }
+      }
+
+      pushSnapshot({
+        phase: "done",
+        coin: null,
+        i: null,
+        dp: dp.slice(),
+        beforeValue: dp[target],
+        addValue: null,
+        afterValue: dp[target],
+        targetIndex: target,
+        sourceIndex: null,
+        completedOperations: operationCounter,
+        description: [
+          "모든 동전 처리가 끝났습니다.",
+          "이제 dp[" + target + "]가 목표 금액 " + target + "원을 만드는 전체 방법 수입니다.",
+          "마지막 줄에서 이 값을 그대로 출력합니다."
+        ].join("\n"),
+        formula: "print(dp[M]) = " + dp[target],
+        primaryLine: 15,
+        relatedLines: []
+      });
+
+      return snapshots;
+
+      function pushSnapshot(snapshot) {
+        snapshots.push({
+          step: snapshots.length,
+          operationStep: null,
+          ...snapshot
+        });
+      }
+    }
+
+    function buildCoinStartDescription(coin, target) {
+      if (coin > target) {
+        return [
+          "이제 " + coin + "원 동전 차례입니다.",
+          "하지만 목표 금액이 " + target + "원이어서 i를 " + coin + "부터 시작할 수 없습니다.",
+          "그래서 이번 동전은 실제 갱신 없이 건너뜁니다."
+        ].join("\n");
+      }
+
+      return [
+        "이제 " + coin + "원 동전 차례입니다.",
+        "안쪽 반복은 i를 " + coin + "부터 " + target + "까지 차례대로 움직입니다.",
+        "같은 동전을 여러 번 써도 되므로, 이번 동전으로 만든 새 경우를 바로 다음 금액 계산에 이어서 사용할 수 있습니다."
+      ].join("\n");
+    }
+
+    function buildOperationDescription(coin, i, beforeValue, addValue, afterValue) {
+      const sourceIndex = i - coin;
+      const lines = [];
+
+      if (i === coin) {
+        lines.push("지금부터 " + coin + "원 동전을 실제로 더해 보기 시작합니다.");
+      }
+
+      lines.push("지금은 " + coin + "원 동전을 사용해서 " + i + "원을 만드는 방법을 추가하는 중입니다.");
+      lines.push(i + "원을 만들 때 마지막에 " + coin + "원을 붙이면, 앞에는 " + sourceIndex + "원을 만드는 방법이 와야 합니다.");
+
+      if (addValue === 0) {
+        lines.push("현재 dp[" + sourceIndex + "]가 0이라 새로 늘어나는 경우가 없습니다. 그래서 dp[" + i + "]는 " + afterValue + "로 그대로입니다.");
+      } else {
+        lines.push("dp[" + sourceIndex + "]가 " + addValue + "이므로 그만큼 새 경우가 생깁니다. 기존 " + beforeValue + "개에 더해 " + afterValue + "개가 됩니다.");
+      }
+
+      return lines.join("\n");
+    }
+
+    function renderAll() {
+      renderSnapshot();
+      renderLogTable();
+      renderCodeHighlight();
+      updateFinalResult();
+      updateControlState();
+    }
+
+    function getCurrentSnapshot() {
+      return appState.snapshots[appState.currentIndex];
+    }
+
+    // 현재 snapshot 하나를 보고 상단 요약, dp 배열, 설명 패널을 함께 갱신합니다.
+    function renderSnapshot() {
+      const snapshot = getCurrentSnapshot();
+
+      if (!snapshot) {
+        return;
+      }
+
+      updateSummary(snapshot);
+      renderDpGrid(snapshot);
+      renderExplanation(snapshot);
+    }
+
+    function updateSummary(snapshot) {
+      const totalSteps = appState.snapshots.length;
+      const progressText = (snapshot.step + 1) + " / " + totalSteps;
+      const progressPercent = totalSteps > 1 ? (snapshot.step / (totalSteps - 1)) * 100 : 100;
+
+      dom.currentCoinValue.textContent = formatCoinText(snapshot);
+      dom.currentIValue.textContent = snapshot.i !== null ? String(snapshot.i) : "-";
+      dom.currentSourceValue.textContent = snapshot.sourceIndex !== null ? "dp[" + snapshot.sourceIndex + "]" : "-";
+      dom.currentPhaseText.textContent = phaseLabel(snapshot.phase);
+      dom.currentTargetText.textContent = snapshot.targetIndex !== null ? "dp[" + snapshot.targetIndex + "]" : "아직 갱신 전";
+      dom.currentSourceHelp.textContent = snapshot.sourceIndex !== null ? "현재 값 " + snapshot.addValue : "dp[i-coin]";
+      dom.progressValue.textContent = progressText;
+      dom.operationProgressText.textContent = "실제 연산 " + snapshot.completedOperations + " / " + appState.totalOperations;
+      dom.formulaText.textContent = snapshot.formula;
+      dom.progressFill.style.width = progressPercent.toFixed(2) + "%";
+      dom.progressRatioText.textContent = progressText;
+    }
+
+    function renderDpGrid(snapshot) {
+      const fragment = document.createDocumentFragment();
+
+      snapshot.dp.forEach(function (value, index) {
+        const cell = document.createElement("div");
+        const roleText = getCellRole(snapshot, index);
+        const classNames = ["dp-cell"];
+
+        if (index === appState.target) {
+          classNames.push("goal");
+        }
+
+        if (index === 0) {
+          classNames.push("base");
+        }
+
+        if (snapshot.phase === "operation" && index === snapshot.sourceIndex) {
+          classNames.push("source");
+        }
+
+        if (snapshot.phase === "operation" && index === snapshot.targetIndex) {
+          classNames.push("target");
+        }
+
+        if (snapshot.phase === "done" && index === appState.target) {
+          classNames.push("answer");
+        }
+
+        cell.className = classNames.join(" ");
+        cell.innerHTML = [
+          '<span class="dp-index">[' + index + "]</span>",
+          '<strong class="dp-value">' + value + "</strong>",
+          roleText ? '<span class="dp-tag">' + roleText + "</span>" : ""
+        ].join("");
+
+        fragment.appendChild(cell);
+      });
+
+      dom.dpGrid.innerHTML = "";
+      dom.dpGrid.appendChild(fragment);
+    }
+
+    function getCellRole(snapshot, index) {
+      if (snapshot.phase === "done" && index === appState.target) {
+        return "정답 칸";
+      }
+
+      if (snapshot.phase === "operation" && index === snapshot.targetIndex) {
+        return "현재 갱신";
+      }
+
+      if (snapshot.phase === "operation" && index === snapshot.sourceIndex) {
+        return "참조";
+      }
+
+      if (snapshot.phase === "init" && index === 0) {
+        return "시작값";
+      }
+
+      if (index === appState.target) {
+        return "목표 M";
+      }
+
+      return "";
+    }
+
+    function renderExplanation(snapshot) {
+      const lines = snapshot.description.split("\n").filter(Boolean);
+      const fragment = document.createDocumentFragment();
+
+      lines.forEach(function (line) {
+        const paragraph = document.createElement("p");
+        paragraph.textContent = line;
+        fragment.appendChild(paragraph);
+      });
+
+      dom.explainPanel.innerHTML = "";
+      dom.explainPanel.appendChild(fragment);
+    }
+
+    // 로그 표는 실제 연산 단계만 누적 표시합니다.
+    function renderLogTable() {
+      const operationSnapshots = appState.snapshots.filter(function (snapshot) {
+        return snapshot.phase === "operation";
+      });
+
+      dom.logBody.innerHTML = "";
+
+      if (!operationSnapshots.length) {
+        const emptyRow = document.createElement("tr");
+        emptyRow.className = "empty-row";
+        emptyRow.innerHTML = '<td colspan="6">표시할 연산이 없습니다.</td>';
+        dom.logBody.appendChild(emptyRow);
+        return;
+      }
+
+      const currentSnapshot = getCurrentSnapshot();
+      const currentOperationStep = currentSnapshot.phase === "operation" ? currentSnapshot.operationStep : null;
+      const fragment = document.createDocumentFragment();
+
+      operationSnapshots.forEach(function (snapshot) {
+        const row = document.createElement("tr");
+
+        if (snapshot.operationStep === currentOperationStep) {
+          row.classList.add("is-current");
+        }
+
+        row.innerHTML = [
+          "<td>" + snapshot.operationStep + "</td>",
+          "<td>" + snapshot.coin + "</td>",
+          "<td>" + snapshot.i + "</td>",
+          "<td>" + snapshot.beforeValue + "</td>",
+          "<td>" + snapshot.addValue + "</td>",
+          "<td>" + snapshot.afterValue + "</td>"
+        ].join("");
+
+        fragment.appendChild(row);
+      });
+
+      dom.logBody.appendChild(fragment);
+    }
+
+    function renderCodeHighlight() {
+      const snapshot = getCurrentSnapshot();
+      const primaryLine = snapshot ? snapshot.primaryLine : null;
+      const relatedLines = snapshot ? new Set(snapshot.relatedLines) : new Set();
+      const fragment = document.createDocumentFragment();
+
+      CODE_LINES.forEach(function (line, index) {
+        const lineNo = index + 1;
+        const row = document.createElement("div");
+        const classes = ["code-line"];
+
+        if (line === "") {
+          classes.push("blank");
+        }
+
+        if (relatedLines.has(lineNo)) {
+          classes.push("context");
+        }
+
+        if (lineNo === primaryLine) {
+          classes.push("active");
+        }
+
+        row.className = classes.join(" ");
+
+        const lineNoSpan = document.createElement("span");
+        lineNoSpan.className = "code-no";
+        lineNoSpan.textContent = String(lineNo);
+
+        const codeTextSpan = document.createElement("span");
+        codeTextSpan.className = "code-text";
+        codeTextSpan.textContent = line === "" ? " " : line;
+
+        row.appendChild(lineNoSpan);
+        row.appendChild(codeTextSpan);
+        fragment.appendChild(row);
+      });
+
+      dom.codeBox.innerHTML = "";
+      dom.codeBox.appendChild(fragment);
+    }
+
+    function updateFinalResult() {
+      if (!appState.snapshots.length) {
+        return;
+      }
+
+      const finalSnapshot = appState.snapshots[appState.snapshots.length - 1];
+      const currentSnapshot = getCurrentSnapshot();
+      const finalValue = finalSnapshot.dp[appState.target];
+      const currentValue = currentSnapshot.dp[appState.target];
+
+      dom.finalAnswerValue.textContent = String(finalValue);
+      dom.finalAnswerText.textContent = "목표 금액 " + appState.target + "원을 만드는 방법 수 = " + finalValue;
+      dom.currentTargetState.textContent = "현재 보고 있는 단계의 dp[" + appState.target + "] = " + currentValue;
+      dom.resultInterpretation.textContent =
+        "모든 동전을 다 처리한 뒤 마지막에 남는 dp[" + appState.target + "] 값이 정답입니다. 현재 단계에서는 " + currentValue + ", 최종적으로는 " + finalValue + "가 됩니다.";
+    }
+
+    function goToStep(nextIndex) {
+      if (!appState.snapshots.length) {
+        return;
+      }
+
+      const clamped = Math.max(0, Math.min(nextIndex, appState.snapshots.length - 1));
+      appState.currentIndex = clamped;
+      renderAll();
+    }
+
+    function startAutoplay() {
+      if (!appState.snapshots.length) {
+        return;
+      }
+
+      if (appState.currentIndex >= appState.snapshots.length - 1) {
+        appState.currentIndex = 0;
+        renderAll();
+      }
+
+      pauseAutoplay();
+
+      appState.autoplayTimer = window.setInterval(function () {
+        if (appState.currentIndex >= appState.snapshots.length - 1) {
+          pauseAutoplay();
+          return;
+        }
+
+        goToStep(appState.currentIndex + 1);
+      }, appState.speedMs);
+
+      updateControlState();
+    }
+
+    function pauseAutoplay() {
+      if (appState.autoplayTimer) {
+        window.clearInterval(appState.autoplayTimer);
+        appState.autoplayTimer = null;
+      }
+
+      updateControlState();
+    }
+
+    function updateControlState() {
+      const hasSnapshots = appState.snapshots.length > 0;
+      const isAtStart = appState.currentIndex <= 0;
+      const isAtEnd = !hasSnapshots || appState.currentIndex >= appState.snapshots.length - 1;
+      const isPlaying = Boolean(appState.autoplayTimer);
+
+      dom.firstButton.disabled = !hasSnapshots || isAtStart;
+      dom.prevButton.disabled = !hasSnapshots || isAtStart;
+      dom.nextButton.disabled = !hasSnapshots || isAtEnd;
+      dom.lastButton.disabled = !hasSnapshots || isAtEnd;
+      dom.playButton.disabled = !hasSnapshots || isPlaying;
+      dom.pauseButton.disabled = !isPlaying;
+    }
+
+    function updateSpeedLabel() {
+      dom.speedLabel.textContent = appState.speedMs + "ms/단계";
+    }
+
+    function setMessage(text, type) {
+      dom.messageBox.textContent = text;
+      dom.messageBox.className = "message-box " + type;
+    }
+
+    function formatCoinText(snapshot) {
+      if (snapshot.phase === "init") {
+        return "준비";
+      }
+
+      if (snapshot.phase === "done") {
+        return "완료";
+      }
+
+      return snapshot.coin + "원";
+    }
+
+    function phaseLabel(phase) {
+      if (phase === "init") {
+        return "초기화 단계";
+      }
+
+      if (phase === "coin-start") {
+        return "새 동전 처리 시작";
+      }
+
+      if (phase === "operation") {
+        return "dp 배열 갱신 중";
+      }
+
+      return "출력 단계";
+    }
+  </script>
+</body>
+</html>

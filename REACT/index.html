@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Like Button Virtual DOM Lab</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Mini Social Feed Demo</p>
+          <h1>왼쪽은 User Page, 오른쪽은 바뀐 컴포넌트만 보여줍니다.</h1>
+          <p class="hero-text">
+            왼쪽 피드에서 Like를 누르면 오른쪽에서 해당 카드만 모션, patch log, GitHub 스타일
+            HTML Diff로 바로 확인할 수 있습니다.
+          </p>
+        </div>
+
+        <div class="hero-actions">
+          <button id="undo-button" type="button">Undo</button>
+          <button id="redo-button" type="button">Redo</button>
+          <button id="reset-button" type="button">Reset</button>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <section class="panel user-panel">
+          <div class="panel-head">
+            <div>
+              <span class="panel-kicker">User Page</span>
+              <h2>Mini Feed</h2>
+            </div>
+            <div id="feed-status" class="status-pill">준비 완료</div>
+          </div>
+
+          <div class="panel-body user-body">
+            <div class="phone-frame">
+              <div class="phone-notch"></div>
+              <div id="actual-root" class="feed-root"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel test-panel">
+          <div class="panel-head">
+            <div>
+              <span class="panel-kicker">Test Page</span>
+              <h2>Focused Virtual DOM Compare</h2>
+            </div>
+            <div id="action-status" class="status-pill accent">동작을 기다리는 중</div>
+          </div>
+
+          <div class="panel-body test-body">
+            <section class="guide-card">
+              <div class="section-title-row">
+                <h3>사용 방법</h3>
+                <span>간단한 시연 흐름</span>
+              </div>
+              <ol class="guide-list">
+                <li>왼쪽 피드에서 `Like`를 누릅니다.</li>
+                <li>상태 변경 없이 보고 싶은 카드만 보려면 `Inspect`를 누릅니다.</li>
+                <li>오른쪽 위 `Undo`, `Redo`, `Reset`으로 흐름을 다시 볼 수 있습니다.</li>
+              </ol>
+            </section>
+
+            <section class="focus-card">
+              <div class="insight-banner">
+                <div>
+                  <p class="insight-label">현재 보는 Post</p>
+                  <strong id="focus-title">Mina 피드 카드</strong>
+                </div>
+                <span id="patch-summary" class="patch-summary">PATCH 0</span>
+              </div>
+
+              <div class="diff-metrics">
+                <div id="add-count" class="metric add">+0</div>
+                <div id="remove-count" class="metric remove">-0</div>
+                <div id="patch-count" class="metric neutral">PATCH 0</div>
+              </div>
+
+              <div class="compare-grid">
+                <article id="before-preview-wrap" class="compare-card preview-stage">
+                  <div class="section-title-row">
+                    <h3>Before</h3>
+                    <span>Focused component</span>
+                  </div>
+                  <div id="before-preview" class="mini-preview"></div>
+                </article>
+
+                <article id="after-preview-wrap" class="compare-card preview-stage">
+                  <div class="section-title-row">
+                    <h3>After</h3>
+                    <span>Focused component</span>
+                  </div>
+                  <div id="after-preview" class="mini-preview"></div>
+                </article>
+              </div>
+            </section>
+
+            <section class="patch-log-wrap">
+              <div class="section-title-row">
+                <h3>변경 내용</h3>
+                <span id="focused-post-label">post-1</span>
+              </div>
+              <ul id="patch-log" class="patch-log"></ul>
+            </section>
+
+            <section class="vdom-change-wrap">
+              <div class="section-title-row">
+                <h3>VDOM Change Objects</h3>
+                <span>DOM 말고 객체 변화만 보기</span>
+              </div>
+              <div class="vdom-change-grid">
+                <article class="compare-card compact-card">
+                  <div class="section-title-row compact-row">
+                    <h3>Patch Objects</h3>
+                    <span>focused component 기준</span>
+                  </div>
+                  <pre id="vdom-change-json" class="code-block compact-block"></pre>
+                </article>
+
+                <article class="compare-card compact-card">
+                  <div class="section-title-row compact-row">
+                    <h3>Before / After Object Diff</h3>
+                    <span>변경된 값만 표시</span>
+                  </div>
+                  <div id="vdom-change-cards" class="object-change-list"></div>
+                </article>
+              </div>
+            </section>
+
+            <section class="code-diff-wrap">
+              <div class="section-title-row">
+                <h3>HTML Diff</h3>
+                <span>빨강은 추가, 파랑은 제거</span>
+              </div>
+              <div id="git-diff" class="git-diff"></div>
+            </section>
+
+            <details class="vdom-details">
+              <summary>focused Virtual DOM 보기</summary>
+              <div class="vdom-grid">
+                <article class="compare-card">
+                  <div class="section-title-row">
+                    <h3>Before VDOM</h3>
+                    <span>Snapshot</span>
+                  </div>
+                  <pre id="before-vdom" class="code-block"></pre>
+                </article>
+
+                <article class="compare-card">
+                  <div class="section-title-row">
+                    <h3>After VDOM</h3>
+                    <span>Snapshot</span>
+                  </div>
+                  <pre id="after-vdom" class="code-block"></pre>
+                </article>
+              </div>
+            </details>
+          </div>
+        </section>
+      </main>
+
+      <section class="history-inspector">
+        <div class="history-head">
+          <div>
+            <span class="panel-kicker">History</span>
+            <h2>State History Timeline</h2>
+            <p id="history-summary" class="history-summary">
+              현재 상태와 저장된 스냅샷 흐름을 여기서 확인할 수 있습니다.
+            </p>
+          </div>
+          <div id="history-position" class="status-pill">STEP 1 / 1</div>
+        </div>
+
+        <div id="history-list" class="history-list"></div>
+      </section>
+    </div>
+
+    <script defer src="./vdom.js"></script>
+    <script defer src="./diff.js"></script>
+    <script defer src="./history.js"></script>
+    <script defer src="./app.js"></script>
+  </body>
+</html>
