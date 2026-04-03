@@ -1,0 +1,4 @@
+.DS_Store
+.venv/
+Virtual-DOM/
+.playwright-cli/

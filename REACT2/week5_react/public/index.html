@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Week5 Mini React Task Manager</title>
+    <link rel="stylesheet" href="../styles/main.css" />
+  </head>
+  <body>
+    <main class="page-shell">
+      <section class="stage-layout">
+        <section class="stage-card stage-card--workspace">
+          <div id="app-root"></div>
+        </section>
+
+        <aside class="inspector-stack inspector-stack--runtime">
+          <section class="inspector-card inspector-card--summary">
+            <div class="section-head">
+              <div>
+                <p class="section-kicker">Engine Inspector</p>
+                <h2>렌더 파이프라인 요약</h2>
+              </div>
+            </div>
+
+            <div class="stats-grid inspector-metrics">
+              <article class="mini-stat">
+                <span>Render Count</span>
+                <strong id="runtime-render-count">0</strong>
+              </article>
+              <article class="mini-stat">
+                <span>Patch Count</span>
+                <strong id="runtime-change-count">0</strong>
+              </article>
+              <article class="mini-stat">
+                <span>Completed</span>
+                <strong id="runtime-completed-count">0</strong>
+              </article>
+              <article class="mini-stat">
+                <span>Memo Cache Hits</span>
+                <strong id="runtime-memo-cache-hits">0</strong>
+              </article>
+            </div>
+
+            <p id="runtime-summary" class="side-note">첫 렌더 이후 diff / patch 결과가 이곳에 표시됩니다.</p>
+          </section>
+
+          <section class="inspector-card inspector-card--spotlight">
+            <div class="section-head">
+              <div>
+                <p class="section-kicker">Root State</p>
+                <h2>상태 스냅샷</h2>
+              </div>
+            </div>
+            <pre id="runtime-state" class="code-panel code-panel--compact"></pre>
+          </section>
+
+        </aside>
+      </section>
+
+      <section class="runtime-detail-grid">
+        <section class="inspector-card inspector-card--spotlight inspector-card--wide">
+          <div class="section-head">
+            <div>
+              <p class="section-kicker">Hooks</p>
+              <h2>HOOK 디버그</h2>
+            </div>
+          </div>
+          <pre id="runtime-hooks" class="code-panel code-panel--wide"></pre>
+        </section>
+
+        <section class="inspector-card inspector-card--spotlight inspector-card--wide">
+          <div class="section-head">
+            <div>
+              <p class="section-kicker">Diff / Patch</p>
+              <h2>변경 로그</h2>
+            </div>
+          </div>
+          <pre id="runtime-changes" class="code-panel code-panel--wide"></pre>
+        </section>
+      </section>
+    </main>
+
+    <script type="module" src="../src/main.js"></script>
+  </body>
+</html>

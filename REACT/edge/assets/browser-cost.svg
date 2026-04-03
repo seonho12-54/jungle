@@ -1,0 +1,27 @@
+<svg width="1200" height="420" viewBox="0 0 1200 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="420" rx="24" fill="#F7FAFD"/>
+  <text x="60" y="62" fill="#1F2937" font-size="30" font-family="Apple SD Gothic Neo, Malgun Gothic, Arial, sans-serif" font-weight="700">왜 실제 DOM 수정은 비용이 큰가</text>
+  <text x="60" y="95" fill="#5B6675" font-size="18" font-family="Apple SD Gothic Neo, Malgun Gothic, Arial, sans-serif">리플로우는 레이아웃을 다시 계산하고, 리페인트는 화면을 다시 그린다.</text>
+
+  <rect x="70" y="145" width="480" height="210" rx="20" fill="#FFFFFF" stroke="#D7E0EA" stroke-width="2"/>
+  <text x="105" y="194" fill="#B7791F" font-size="28" font-family="Apple SD Gothic Neo, Malgun Gothic, Arial, sans-serif" font-weight="700">리플로우</text>
+  <text x="105" y="233" fill="#1F2937" font-size="18" font-family="Apple SD Gothic Neo, Malgun Gothic, Arial, sans-serif">크기나 위치가 바뀌면</text>
+  <text x="105" y="261" fill="#1F2937" font-size="18" font-family="Apple SD Gothic Neo, Malgun Gothic, Arial, sans-serif">브라우저가 레이아웃을 다시 계산한다.</text>
+  <rect x="360" y="190" width="120" height="120" rx="16" fill="#FFF5E1" stroke="#E9C46A" stroke-width="2"/>
+  <rect x="390" y="220" width="60" height="18" rx="4" fill="#E9C46A"/>
+  <rect x="390" y="246" width="40" height="18" rx="4" fill="#E9C46A"/>
+  <rect x="105" y="295" width="200" height="26" rx="13" fill="#FFF5E1"/>
+  <text x="137" y="313" fill="#8A5A12" font-size="15" font-family="Apple SD Gothic Neo, Malgun Gothic, Arial, sans-serif">배치 / 위치 / 크기</text>
+
+  <rect x="650" y="145" width="480" height="210" rx="20" fill="#FFFFFF" stroke="#D7E0EA" stroke-width="2"/>
+  <text x="685" y="194" fill="#2B6CB0" font-size="28" font-family="Apple SD Gothic Neo, Malgun Gothic, Arial, sans-serif" font-weight="700">리페인트</text>
+  <text x="685" y="233" fill="#1F2937" font-size="18" font-family="Apple SD Gothic Neo, Malgun Gothic, Arial, sans-serif">색상이나 스타일만 바뀌면</text>
+  <text x="685" y="261" fill="#1F2937" font-size="18" font-family="Apple SD Gothic Neo, Malgun Gothic, Arial, sans-serif">브라우저가 픽셀을 다시 그린다.</text>
+  <rect x="940" y="190" width="120" height="120" rx="16" fill="#E8F2FC" stroke="#7FB3E8" stroke-width="2"/>
+  <circle cx="1000" cy="250" r="34" fill="#7FB3E8"/>
+  <rect x="685" y="295" width="180" height="26" rx="13" fill="#E8F2FC"/>
+  <text x="715" y="313" fill="#2B6CB0" font-size="15" font-family="Apple SD Gothic Neo, Malgun Gothic, Arial, sans-serif">색상 / 배경</text>
+
+  <rect x="390" y="32" width="420" height="44" rx="14" fill="#EAF3FB"/>
+  <text x="420" y="60" fill="#1F2937" font-size="18" font-family="Apple SD Gothic Neo, Malgun Gothic, Arial, sans-serif" font-weight="700">가상 DOM은 바뀐 부분만 실제 DOM에 반영하도록 도와준다</text>
+</svg>
