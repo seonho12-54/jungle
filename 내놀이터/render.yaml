@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: always-on-story-monitor
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: 3001
+      - key: MONITOR_INTERVAL_MS
+        value: 60000
+      - key: WAIT_AFTER_SEARCH_MS
+        value: 3000
+      - key: BETWEEN_USERS_MS
+        value: 1500
+      - key: MONITOR_HEADLESS
+        value: "true"
+      - key: STATE_FILE_PATH
+        value: /app/data/monitor-state.json
+      - key: MONITOR_USERS
+        sync: false
+      - key: SLACK_WEBHOOK_URL
+        sync: false
+    disk:
+      name: story-monitor-data
+      mountPath: /app/data
+      sizeGB: 1

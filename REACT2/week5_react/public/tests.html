@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Week5 Mini React Browser Tests</title>
+    <link rel="stylesheet" href="../styles/main.css" />
+  </head>
+  <body>
+    <main class="page-shell page-shell--tests">
+      <header class="hero-banner hero-banner--compact">
+        <p class="eyebrow">Browser Test Runner</p>
+        <h1>Week5 Mini React Verification</h1>
+        <p class="hero-copy">
+          실제 DOM patch, Todo Dashboard 상호작용, localStorage effect, memo 갱신 흐름을
+          브라우저에서 확인합니다.
+        </p>
+      </header>
+
+      <section class="inspector-card">
+        <div class="section-head">
+          <div>
+            <p class="section-kicker">Result</p>
+            <h2>테스트 로그</h2>
+          </div>
+          <span id="test-summary" class="section-chip">실행 전</span>
+        </div>
+        <ol id="test-results" class="test-results"></ol>
+      </section>
+    </main>
+
+    <script type="module" src="../tests/runTests.js"></script>
+  </body>
+</html>
