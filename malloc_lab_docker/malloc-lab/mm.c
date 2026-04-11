@@ -18,11 +18,21 @@
 #include "mm.h"
 #include "memlib.h"
 
+
+static char *mem_heap; /* Points to first byte of heap */
+static char *mem_brk;  /* Points to last byte of heap plus 1 */
+static char *mem_max_addr; /* Max legal heap addr plus 1 */
+
+
+
 /*********************************************************
  * NOTE TO STUDENTS: Before you do anything else, please
  * provide your team information in the following struct.
  ********************************************************/
-team_t team = {
+
+
+
+ team_t team = {
     /* Team name */
     "ateam",
     /* First member's full name */
@@ -47,6 +57,12 @@ team_t team = {
  */
 int mm_init(void)
 {
+
+    mem_heap =(char *)Malloc(MAX_HEAP);
+    mem_brk = (char *)mem_heap;
+    mem
+
+
     return 0;
 }
 
