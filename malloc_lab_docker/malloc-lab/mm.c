@@ -233,18 +233,80 @@ static void *coalesce(void *bp)
  * mm_realloc - Implemented simply in terms of mm_malloc and mm_free
  */
 void *mm_realloc(void *ptr, size_t size)
-{
-    void *oldptr = ptr;
-    void *newptr;
-    size_t copySize;
+{ 
 
+    size_t oldsize, asize, next_alloc, csize;
+    void *next_bp, *newptr;
+
+    // realloc(NULL, size) == malloc(size)
+    if (ptr == NULL)
+        return mm_malloc(size);
+
+    // realloc(ptr, 0) == free(ptr), return NULL
+    if (size == 0) {
+        mm_free(ptr);
+        return NULL;
+    }
+
+    // 요청 크기를 블록 크기로 맞춤
+    if (size <= DSIZE)
+        asize = 2 * DSIZE;
+    else
+        asize = DSIZE * ((size + DSIZE + (DSIZE - 1)) / DSIZE);
+
+    oldsize = GET_SIZE(HDRP(ptr));
+
+    // 1) 지금 블록이 이미 충분히 크면 그대로 사용
+    if (oldsize >= asize) {
+        // 남는 공간이 충분하면 분할해도 됨
+        if (oldsize - asize >= 2 * DSIZE) {
+            PUT(HDRP(ptr), PACK(asize, 1));
+            PUT(FTRP(ptr), PACK(asize, 1));
+
+            next_bp = NEXT_BLKP(ptr);
+            PUT(HDRP(next_bp), PACK(oldsize - asize, 0));
+            PUT(FTRP(next_bp), PACK(oldsize - asize, 0));
+            coalesce(next_bp);
+        }
+        return ptr;
+    }
+
+    // 2) 다음 블록이 free면 합쳐서 확장 시도
+    next_bp = NEXT_BLKP(ptr);
+    next_alloc = GET_ALLOC(HDRP(next_bp));
+    csize = oldsize;
+
+    if (!next_alloc) {
+        csize += GET_SIZE(HDRP(next_bp));
+        if (csize >= asize) {
+            PUT(HDRP(ptr), PACK(csize, 1));
+            PUT(FTRP(ptr), PACK(csize, 1));
+
+            // 남는 공간 있으면 다시 분할
+            if (csize - asize >= 2 * DSIZE) {
+                PUT(HDRP(ptr), PACK(asize, 1));
+                PUT(FTRP(ptr), PACK(asize, 1));
+
+                next_bp = NEXT_BLKP(ptr);
+                PUT(HDRP(next_bp), PACK(csize - asize, 0));
+                PUT(FTRP(next_bp), PACK(csize - asize, 0));
+            }
+            return ptr;
+        }
+    }
+
+    // 3) fallback: 새로 할당 후 복사
     newptr = mm_malloc(size);
     if (newptr == NULL)
         return NULL;
-    copySize = *(size_t *)((char *)oldptr - SIZE_T_SIZE);
-    if (size < copySize)
-        copySize = size;
-    memcpy(newptr, oldptr, copySize);
-    mm_free(oldptr);
+
+    // payload 크기만 복사
+    oldsize = GET_SIZE(HDRP(ptr)) - DSIZE;
+    if (size < oldsize)
+        oldsize = size;
+
+    memcpy(newptr, ptr, oldsize);
+    mm_free(ptr);
     return newptr;
+
 }
