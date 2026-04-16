@@ -1,2 +1,0 @@
-[j]))
-    return lst2

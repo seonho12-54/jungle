@@ -1,3 +1,0 @@
-SELECT * FROM users;
-INSERT INTO users VALUES (1, 'kim');
-SELECT name FROM users;
